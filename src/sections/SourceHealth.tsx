@@ -1,5 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { trpc } from "@/providers/trpc";
+import { useDashboardRefresh } from "@/providers/DashboardRefreshContext";
 
 type SourceItem = {
   source_name: string;
@@ -17,8 +18,9 @@ const SOURCE_URLS: Record<string, string | undefined> = {
 };
 
 export function SourceHealth() {
+  const { getRefetchInterval } = useDashboardRefresh();
   const { data, isLoading } = trpc.dashboard.sources.useQuery(undefined, {
-    refetchInterval: 60000,
+    refetchInterval: getRefetchInterval,
   });
 
   if (isLoading) {

@@ -1,5 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { trpc } from "@/providers/trpc";
+import { useDashboardRefresh } from "@/providers/DashboardRefreshContext";
 
 function getThreatColor(avgThreat: number) {
   if (avgThreat >= 60) return "text-[#ef4444]";
@@ -14,12 +15,13 @@ export function RegionalBreakdown({
   region: string;
   operatingModel: string;
 }) {
+  const { getRefetchInterval } = useDashboardRefresh();
   const { data, isLoading } = trpc.dashboard.regions.useQuery(
     {
       region: region === "All" ? undefined : region,
       operating_model: operatingModel === "All" ? undefined : operatingModel,
     },
-    { refetchInterval: 60000 },
+    { refetchInterval: getRefetchInterval },
   );
 
   if (isLoading) {

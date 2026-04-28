@@ -1,6 +1,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { ExternalLink } from "lucide-react";
 import { trpc } from "@/providers/trpc";
+import { useDashboardRefresh } from "@/providers/DashboardRefreshContext";
 
 function isValidUrl(url: string | null | undefined): boolean {
   if (!url) return false;
@@ -49,13 +50,14 @@ export function SignalTimeline({
   region: string;
   operatingModel: string;
 }) {
+  const { getRefetchInterval } = useDashboardRefresh();
   const { data, isLoading } = trpc.dashboard.timeline.useQuery(
     {
       region: region === "All" ? undefined : region,
       operating_model: operatingModel === "All" ? undefined : operatingModel,
       limit: 20,
     },
-    { refetchInterval: 60000 },
+    { refetchInterval: getRefetchInterval },
   );
 
   if (isLoading) {

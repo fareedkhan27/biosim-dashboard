@@ -1,7 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
 import { RefreshCw } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
 
-export function Header({ onRefresh }: { onRefresh: () => void }) {
+export function Header({
+  onRefresh,
+  lastUpdated,
+}: {
+  onRefresh: () => void;
+  lastUpdated: Date;
+}) {
   const [currentTime, setCurrentTime] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -50,6 +57,9 @@ export function Header({ onRefresh }: { onRefresh: () => void }) {
             </span>
             <span className="text-xs text-dash-text-muted hidden md:block">
               {currentTime}
+            </span>
+            <span className="text-[11px] text-gray-500 hidden lg:block">
+              Updated {formatDistanceToNow(lastUpdated, { addSuffix: false })} ago
             </span>
             <button
               onClick={handleRefresh}

@@ -1,5 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useState, useCallback } from "react";
 import { Header } from "@/sections/Header";
 import { KPICards } from "@/sections/KPICards";
 import { NoiseAlert } from "@/sections/NoiseAlert";
@@ -12,29 +11,34 @@ import { SourceHealth } from "@/sections/SourceHealth";
 import { AuditFooter } from "@/sections/AuditFooter";
 import { RefreshToast } from "@/components/RefreshToast";
 import { useDashboardFilters } from "@/hooks/useDashboardFilters";
+import {
+  DashboardRefreshProvider,
+  useDashboardRefresh,
+} from "@/providers/DashboardRefreshContext";
 
-export default function Home() {
-  const { region, operatingModel, setFilter, availableModels, availableRegions } = useDashboardFilters();
+function Dashboard() {
+  const { region, operatingModel, setFilter, availableModels, availableRegions } =
+    useDashboardFilters();
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const queryClient = useQueryClient();
+  const { lastUpdated, refresh, setInteracting } = useDashboardRefresh();
 
   const handleRefresh = useCallback(() => {
     setIsRefreshing(true);
-    queryClient.invalidateQueries();
+    refresh();
     setTimeout(() => setIsRefreshing(false), 2000);
-  }, [queryClient]);
+  }, [refresh]);
 
-  // Auto-refresh every 60 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      handleRefresh();
-    }, 60000);
-    return () => clearInterval(interval);
-  }, [handleRefresh]);
+  const handleFilterChange = useCallback(
+    (type: "region" | "operatingModel", value: string) => {
+      setInteracting(true);
+      setFilter(type, value);
+    },
+    [setFilter, setInteracting]
+  );
 
   return (
     <div className="min-h-screen bg-[#0a0e1a] text-white font-inter">
-      <Header onRefresh={handleRefresh} />
+      <Header onRefresh={handleRefresh} lastUpdated={lastUpdated} />
       <RefreshToast visible={isRefreshing} />
 
       <main className="pt-[100px] pb-12 space-y-10">
@@ -55,7 +59,7 @@ export default function Home() {
             operatingModel={operatingModel}
             availableModels={availableModels}
             availableRegions={availableRegions}
-            onFilterChange={setFilter}
+            onFilterChange={handleFilterChange}
           />
         </section>
 
@@ -88,5 +92,13 @@ export default function Home() {
       {/* Section 10: Audit Footer */}
       <AuditFooter />
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <DashboardRefreshProvider>
+      <Dashboard />
+    </DashboardRefreshProvider>
   );
 }

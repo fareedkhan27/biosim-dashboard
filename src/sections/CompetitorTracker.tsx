@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { trpc } from "@/providers/trpc";
+import { useDashboardRefresh } from "@/providers/DashboardRefreshContext";
 
 type SortField =
   | "name"
@@ -13,12 +14,13 @@ type SortField =
 type SortDirection = "asc" | "desc";
 
 export function CompetitorTracker({ region, operatingModel }: { region: string; operatingModel: string }) {
+  const { getRefetchInterval } = useDashboardRefresh();
   const { data, isLoading } = trpc.dashboard.competitors.useQuery(
     {
       region: region === "All" ? undefined : region,
       operating_model: operatingModel === "All" ? undefined : operatingModel,
     },
-    { refetchInterval: 60000 },
+    { refetchInterval: getRefetchInterval },
   );
 
   const [sortField, setSortField] = useState<SortField>("total_signals_count");

@@ -1,5 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { trpc } from "@/providers/trpc";
+import { useDashboardRefresh } from "@/providers/DashboardRefreshContext";
 
 function getThreatColor(level: string) {
   switch (level) {
@@ -34,12 +35,13 @@ export function ThreatHeatmap({
   region: string;
   operatingModel: string;
 }) {
+  const { getRefetchInterval } = useDashboardRefresh();
   const { data, isLoading } = trpc.dashboard.heatmap.useQuery(
     {
       region: region === "All" ? undefined : region,
       operating_model: operatingModel === "All" ? undefined : operatingModel,
     },
-    { refetchInterval: 60000 },
+    { refetchInterval: getRefetchInterval },
   );
 
   if (isLoading) {
